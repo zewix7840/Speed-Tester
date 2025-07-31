@@ -13,7 +13,7 @@ It displays your **download speed**, **upload speed**, and **ping** with a moder
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/speed-tester.git
+git clone https://github.com/zewix7840/Speed-Tester.git
 cd speed-tester
 2. Open index.html in your browser
 No server setup is needed – it's a static website!
