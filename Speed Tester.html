@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Speed Test</title>
+  <style>
+    body {
+      background-color: #0e0e0e;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .gauge {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: conic-gradient(#1a73e8 0%, #444 0%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .gauge span {
+      position: absolute;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      border: none;
+      border-radius: 6px;
+      background-color: #1a73e8;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #145ab5;
+    }
+
+    #pingResult, #speedResult {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Интернет-тест скорости</h1>
+
+  <div class="gauge" id="gauge">
+    <span id="speedDisplay">0.0</span>
+  </div>
+
+  <button onclick="startSpeedTest()">Запустить тест</button>
+  <div id="pingResult"></div>
+  <div id="speedResult"></div>
+
+  <script>
+    async function startSpeedTest() {
+      document.getElementById("pingResult").textContent = "Измерение Ping...";
+      document.getElementById("speedResult").textContent = "Измерение скорости...";
+      document.getElementById("speedDisplay").textContent = "0.0";
+      updateGauge(0);
+
+      await testPing();
+      await testDownloadSpeed();
+    }
+
+    async function testPing() {
+      const pingUrl = "https://www.google.com/images/branding/googlelogo/1x/googlelogo_light_color_92x30dp.png";
+      const start = performance.now();
+      try {
+        await fetch(pingUrl, { method: "HEAD", cache: "no-cache" });
+        const end = performance.now();
+        const ping = end - start;
+        document.getElementById("pingResult").textContent = `Ping: ${ping.toFixed(0)} мс`;
+      } catch (e) {
+        document.getElementById("pingResult").textContent = "Ошибка при измерении ping.";
+        console.error(e);
+      }
+    }
+
+    async function testDownloadSpeed() {
+      const url = "https://speed.cloudflare.com/__down?bytes=10000000";
+      const start = performance.now();
+      try {
+        const response = await fetch(url);
+        const reader = response.body.getReader();
+        let loaded = 0;
+        let lastUpdate = start;
+        const speedElem = document.getElementById("speedDisplay");
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          loaded += value.length;
+
+          const now = performance.now();
+          const duration = (now - start) / 1000;
+          const speed = (loaded * 8) / (duration * 1024 * 1024); // Mbps
+
+          if (now - lastUpdate > 100) {
+            speedElem.textContent = speed.toFixed(1);
+            updateGauge(speed);
+            lastUpdate = now;
+          }
+        }
+
+        const end = performance.now();
+        const duration = (end - start) / 1000;
+        const speedMbps = (loaded * 8) / (duration * 1024 * 1024);
+
+        speedElem.textContent = speedMbps.toFixed(1);
+        updateGauge(speedMbps);
+        document.getElementById("speedResult").textContent = `Итоговая скорость загрузки: ${speedMbps.toFixed(2)} Mbps`;
+      } catch (e) {
+        document.getElementById("speedResult").textContent = "Ошибка при измерении загрузки.";
+        console.error(e);
+      }
+    }
+
+    function updateGauge(speed) {
+      const maxSpeed = 100; // можно настроить под свой максимум
+      const percent = Math.min(speed / maxSpeed, 1) * 100;
+      document.getElementById("gauge").style.background = `conic-gradient(#1a73e8 ${percent}%, #444 ${percent}%)`;
+    }
+  </script>
+</body>
+</html>
