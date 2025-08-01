@@ -1,9 +1,9 @@
-Speed Tester 🌐
-A simple web-based tool that measures your ping and download speed in real-time.
+# 🌐 Speed Tester
 
-🚀 Features
-Instantly measures ping
+**Speed Tester** is a simple web-based tool that measures your **ping** and **download speed** in real-time.
 
-Displays download speed
+## 🚀 Features
 
-Clean and minimal interface
+- Instantly measures **Ping**
+- Displays **Download Speed**
+- Clean and minimal user interface
